@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modonix Prospect Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#F4F5F2;
+    --ink:#1A2129;
+    --steel:#8A959E;
+    --line:#D8DCD9;
+    --seam:#D9581E;
+    --seam-soft:#FBEAE0;
+    --ok:#2E7D4F;
+    --err:#B3341E;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
+  body{
+    background:var(--paper);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;
+    font-variation-settings:'wdth' 100;line-height:1.5;min-height:100vh;padding:0 20px 80px;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+  header{padding:44px 0 28px;border-bottom:3px solid var(--ink)}
+  .brand{font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--steel)}
+  h1{font-weight:800;font-variation-settings:'wdth' 118;font-size:clamp(30px,5.4vw,46px);letter-spacing:-.01em;line-height:1.05;margin-top:8px}
+  h1 .seamword{color:var(--seam)}
+  .tagline{margin-top:10px;font-size:15px;color:var(--steel);max-width:60ch}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-top:none;padding:28px;margin-top:0}
+  .field{margin-bottom:20px}
+  label{display:block;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
+  label .opt{color:var(--steel);font-weight:500;letter-spacing:.1em;text-transform:none}
+  input[type="text"], input[type="password"], input[type="number"]{
+    width:100%;padding:13px 14px;font-size:16px;font-family:'Archivo',sans-serif;
+    border:1px solid var(--line);border-radius:0;background:var(--paper);color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--seam);outline-offset:1px;background:#fff}
+  .hint{font-size:13px;color:var(--steel);margin-top:6px}
+
+  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  button{
+    font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;
+    padding:14px 26px;border:none;cursor:pointer;border-radius:0;
+  }
+  button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .btn-mine{background:var(--ink);color:#fff}
+  .btn-mine:hover{background:var(--seam)}
+  .btn-mine:disabled{background:var(--steel);cursor:not-allowed}
+  .count-select{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--steel)}
+  select{
+    font-family:'IBM Plex Mono',monospace;font-size:14px;padding:10px 8px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:0;
+  }
+
+  .status{
+    margin-top:22px;padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;
+    border-left:4px solid var(--steel);background:var(--card);display:none;
+  }
+  .status.on{display:block}
+  .status.working{border-left-color:var(--seam)}
+  .status.error{border-left-color:var(--err);color:var(--err)}
+  .status.done{border-left-color:var(--ok);color:var(--ok)}
+  .pulse{display:inline-block;width:9px;height:9px;background:var(--seam);margin-right:9px;animation:pl 1.1s infinite}
+  @keyframes pl{0%,100%{opacity:1}50%{opacity:.2}}
+
+  .cost-note{
+    margin-top:14px;padding:12px 14px;font-size:12.5px;color:var(--ink);
+    background:var(--seam-soft);border-left:3px solid var(--seam);
+  }
+
+  .results{margin-top:36px;display:none}
+  .results.on{display:block}
+  .res-head{
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;
+    border-bottom:3px solid var(--ink);padding-bottom:10px;margin-bottom:0;
+  }
+  .res-head h2{font-weight:800;font-variation-settings:'wdth' 115;font-size:22px;letter-spacing:-.01em}
+  .res-head .meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel)}
+
+  .block{background:var(--card);border:1px solid var(--line);border-top:none;padding:24px 26px}
+  .block + .block{margin-top:26px;border-top:3px solid var(--ink)}
+  .block-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+  .block-title h3{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+  .block-title h3 span{color:var(--seam)}
+  .btn-copy{background:var(--paper);color:var(--ink);border:1px solid var(--ink);font-size:11px;padding:9px 16px}
+  .btn-copy:hover{background:var(--ink);color:#fff}
+  .btn-copy.copied{background:var(--ok);border-color:var(--ok);color:#fff}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{
+    text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--steel);padding:8px 10px;border-bottom:2px solid var(--ink);
+  }
+  td{padding:10px;border-bottom:1px dashed var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td a{color:var(--seam);text-decoration:none;word-break:break-word}
+  td a:hover{text-decoration:underline}
+  .cat-tag{
+    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    background:var(--seam-soft);border-left:2px solid var(--seam);padding:2px 6px;color:var(--ink);
+  }
+  .table-wrap{overflow-x:auto}
+
+  footer{margin-top:56px;font-size:12px;color:var(--steel);font-family:'IBM Plex Mono',monospace}
+  @media(max-width:560px){.panel{padding:20px 16px}.block{padding:18px 14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Modonix &middot; Internal Tool</div>
+    <h1>Prospect <span class="seamword">Finder</span></h1>
+    <p class="tagline">Feed it a customer category and a ZIP code or city, and it searches Google Maps for businesses matching that profile in that area. Built as the sourcing half of the CRM classifier pair &mdash; the classifier tells you which industries are your best customers, this finds more of them.</p>
+  </header>
+
+  <div class="panel">
+    <div class="field">
+      <label for="category">Customer Category <span class="opt">(what the classifier flags as your best-fit industry)</span></label>
+      <input type="text" id="category" placeholder="e.g. industrial safety equipment distributors">
+    </div>
+
+    <div class="field">
+      <label for="apikey">Google Maps API Key <span class="opt">(needs Maps JavaScript API + Places API (New) enabled, HTTP referrer restricted)</span></label>
+      <input type="password" id="apikey" placeholder="AIza...">
+      <p class="hint">Held in memory only for this session, never saved. Re-paste each time you open the tool. In Google Cloud Console, enable "Places API (New)" specifically, not the older "Places API" (new projects can no longer turn that one on). Restrict the key to this page's URL as an HTTP referrer, not by IP.</p>
+    </div>
+
+    <div class="row" style="margin-bottom:20px;align-items:flex-end">
+      <div class="field" style="margin-bottom:0">
+        <label for="locType" style="margin-bottom:6px">Search by</label>
+        <select id="locType" onchange="updateLocPlaceholder()">
+          <option value="zip">ZIP code</option>
+          <option value="city">City</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0;flex:1;min-width:200px">
+        <label for="locValue" style="margin-bottom:6px">Location <span class="opt" id="locHint">(e.g. 32937)</span></label>
+        <input type="text" id="locValue" placeholder="32937">
+      </div>
+      <div class="count-select">
+        <label for="radius" style="margin:0;font-size:11px">Radius</label>
+        <select id="radius">
+          <option value="16000">10 mi</option>
+          <option value="32000" selected>20 mi</option>
+          <option value="48000">30 mi (Google's practical max per point)</option>
+        </select>
+      </div>
+      <div class="count-select">
+        <label for="maxSearches" style="margin:0;font-size:11px">Session cap</label>
+        <input type="number" id="maxSearches" value="25" min="1" max="500" style="width:70px;padding:9px 8px;font-family:'IBM Plex Mono',monospace;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink)">
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:20px">
+      <div class="count-select">
+        <label for="details" style="margin:0;font-size:11px">Phone &amp; website</label>
+        <select id="details">
+          <option value="yes" selected>Include (same call, slightly higher rate)</option>
+          <option value="no">Skip (name/address only, cheapest)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn-mine" id="findBtn" onclick="runSearch()">Find Prospects</button>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="cost-note">
+      Each search (one ZIP or one city) is one billed Google request, whether it finds 2 businesses or 20. Including phone/website bumps the rate slightly but it's still one request. Google's current published rates run roughly $32 per 1,000 searches for name/address (first 5,000/month free), or $35 per 1,000 with phone/website included (first 1,000/month free). The session cap above is a hard stop: once you hit it, the tool refuses to search again until you raise the number or reload the page.
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="res-head">
+      <h2>Prospect Report</h2>
+      <div class="meta" id="resMeta"></div>
+    </div>
+    <div class="block">
+      <div class="block-title">
+        <h3><span>&#9646;</span> Matched Businesses</h3>
+        <button class="btn-copy" id="downloadXlsx" onclick="downloadXlsx()">Download Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table id="resultsTable">
+          <thead>
+            <tr><th>Business</th><th>Address</th><th>Phone</th><th>Website</th><th>Matched Search Point</th></tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>Modonix Prospect Finder v2.3 &middot; runs on the Places API (New) via the Maps JavaScript API loader, since new Google projects can no longer enable the older legacy Places API &middot; ZIP and city search only, one point per search &middot; session cap enforced client-side &middot; verify results before outreach</footer>
+</div>
+
+
+<script>
+let allResults = [];
+let sessionSearchCount = 0;
+
+function updateLocPlaceholder(){
+  const type = document.getElementById('locType').value;
+  const input = document.getElementById('locValue');
+  const hint = document.getElementById('locHint');
+  if(type === 'zip'){
+    input.placeholder = '32937';
+    hint.textContent = '(e.g. 32937 — radius means miles out from this ZIP)';
+  } else {
+    input.placeholder = 'Orlando, FL';
+    hint.textContent = '(e.g. Orlando, FL — radius means miles out from this city)';
+  }
+}
+
+function geocodeLocation(geocoder, address){
+  return new Promise((resolve, reject) => {
+    geocoder.geocode({ address }, (results, status) => {
+      if(status !== 'OK' || !results || !results.length){
+        reject(new Error('Could not geocode "' + address + '". Check the spelling.'));
+        return;
+      }
+      resolve(results[0]);
+    });
+  });
+}
+
+function setStatus(kind, msg){
+  const s = document.getElementById('status');
+  s.className = 'status on ' + kind;
+  s.innerHTML = (kind === 'working' ? '<span class="pulse"></span>' : '') + msg;
+}
+
+function loadGoogleMaps(apiKey){
+  return new Promise((resolve, reject) => {
+    if(window.google && window.google.maps && window.google.maps.places){
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(apiKey) + '&libraries=places';
+    script.async = true;
+    script.onload = () => {
+      if(window.google && window.google.maps && window.google.maps.places){
+        resolve();
+      } else {
+        reject(new Error('Google Maps script loaded but Places library is unavailable. Confirm Places API is enabled on this key.'));
+      }
+    };
+    script.onerror = () => reject(new Error('Failed to load Google Maps script. Check the API key and that Maps JavaScript API is enabled.'));
+    document.head.appendChild(script);
+  });
+}
+
+async function searchTextNew(category, lat, lng, radiusMeters, wantDetails){
+  const { Place } = await google.maps.importLibrary('places');
+  const fields = wantDetails
+    ? ['id','displayName','formattedAddress','nationalPhoneNumber','websiteURI']
+    : ['id','displayName','formattedAddress'];
+  try{
+    const request = {
+      textQuery: category,
+      fields: fields,
+      locationBias: { center: { lat, lng }, radius: radiusMeters },
+      maxResultCount: 20,
+      language: 'en',
+      region: 'us'
+    };
+    const { places } = await Place.searchByText(request);
+    return places || [];
+  }catch(e){
+    console.error('Search point failed:', e);
+    return [];
+  }
+}
+
+async function runSearch(){
+  const category = document.getElementById('category').value.trim();
+  const apiKey = document.getElementById('apikey').value.trim();
+  const locType = document.getElementById('locType').value;
+  const locValue = document.getElementById('locValue').value.trim();
+  const radius = parseInt(document.getElementById('radius').value, 10);
+  const fetchDetails = document.getElementById('details').value === 'yes';
+  const maxSearches = parseInt(document.getElementById('maxSearches').value, 10) || 25;
+
+  if(!category){
+    setStatus('error','Enter a customer category first.');
+    return;
+  }
+  if(!locValue){
+    setStatus('error','Enter a location first.');
+    return;
+  }
+  if(!apiKey){
+    setStatus('error','Paste your Google Maps API key first.');
+    return;
+  }
+  if(sessionSearchCount >= maxSearches){
+    setStatus('error','Session limit reached (' + sessionSearchCount + ' of ' + maxSearches + ' searches used). Raise the limit above or reload the page to reset.');
+    return;
+  }
+
+  const btn = document.getElementById('findBtn');
+  btn.disabled = true;
+  document.getElementById('results').classList.remove('on');
+  allResults = [];
+
+  try{
+    setStatus('working','Loading Google Maps.');
+    await loadGoogleMaps(apiKey);
+
+    const geocoder = new google.maps.Geocoder();
+
+    setStatus('working', 'Locating ' + locValue + '.');
+    const geo = await geocodeLocation(geocoder, locValue + ', USA');
+    const loc = geo.geometry.location;
+
+    sessionSearchCount++;
+    setStatus('working', 'Searching (search ' + sessionSearchCount + ' of ' + maxSearches + ' allowed this session).');
+
+    const places = await searchTextNew(category, loc.lat(), loc.lng(), radius, fetchDetails);
+    const seen = new Set();
+
+    for(const p of places){
+      const id = p.id;
+      if(!id || seen.has(id)) continue;
+      seen.add(id);
+      allResults.push({
+        place_id: id,
+        name: (p.displayName && p.displayName.text) || p.displayName || '',
+        address: p.formattedAddress || '',
+        phone: p.nationalPhoneNumber || '',
+        website: p.websiteURI || '',
+        area: locValue
+      });
+    }
+
+    renderResults();
+    setStatus('done', allResults.length + ' unique businesses found. Session searches used: ' + sessionSearchCount + ' of ' + maxSearches + '.');
+  }catch(e){
+    console.error(e);
+    setStatus('error','Search failed: ' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderResults(){
+  const body = document.getElementById('resultsBody');
+  if(allResults.length === 0){
+    body.innerHTML = '<tr><td colspan="5">No matches found. Try a broader category, a larger radius, or a different location.</td></tr>';
+  } else {
+    body.innerHTML = allResults.map(r =>
+      '<tr>' +
+        '<td>' + esc(r.name) + '</td>' +
+        '<td>' + esc(r.address) + '</td>' +
+        '<td>' + esc(r.phone) + '</td>' +
+        '<td>' + (r.website ? '<a href="'+esc(r.website)+'" target="_blank" rel="noopener">'+esc(r.website)+'</a>' : '') + '</td>' +
+        '<td><span class="cat-tag">' + esc(r.area) + '</span></td>' +
+      '</tr>'
+    ).join('');
+  }
+  document.getElementById('resMeta').textContent = allResults.length + ' businesses';
+  document.getElementById('results').classList.add('on');
+  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function downloadXlsx(){
+  if(!allResults.length){
+    setStatus('error','Nothing to download yet, run a search first.');
+    return;
+  }
+  const rows = allResults.map(r => ({
+    'Business': r.name,
+    'Address': r.address,
+    'Phone': r.phone,
+    'Website': r.website,
+    'Matched Search Point': r.area
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:32},{wch:42},{wch:16},{wch:32},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Prospects');
+  XLSX.writeFile(wb, 'modonix_prospects.xlsx');
+}
+</script>
+</body>
+</html>
