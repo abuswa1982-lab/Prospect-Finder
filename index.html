@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modonix Prospect Finder</title>
+<title>Modonix Customer Toolkit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -17,17 +17,27 @@
   @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
   body{background:var(--paper);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;font-variation-settings:'wdth' 100;line-height:1.5;min-height:100vh;padding:0 20px 80px}
   .wrap{max-width:960px;margin:0 auto}
-  header{padding:44px 0 28px;border-bottom:3px solid var(--ink)}
+  header{padding:44px 0 24px;border-bottom:3px solid var(--ink)}
   .brand{font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--steel)}
   h1{font-weight:800;font-variation-settings:'wdth' 118;font-size:clamp(30px,5.4vw,46px);letter-spacing:-.01em;line-height:1.05;margin-top:8px}
   h1 .seamword{color:var(--seam)}
-  .tagline{margin-top:10px;font-size:15px;color:var(--steel);max-width:60ch}
+  .tagline{margin-top:10px;font-size:15px;color:var(--steel);max-width:64ch}
+
+  /* Tabs */
+  .tabs{display:flex;gap:0;margin-top:0;border-bottom:none}
+  .tab{font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    padding:15px 22px;border:1px solid var(--line);border-bottom:none;background:var(--paper);color:var(--steel);cursor:pointer}
+  .tab + .tab{border-left:none}
+  .tab:hover{color:var(--ink)}
+  .tab.active{background:var(--card);color:var(--ink);border-top:3px solid var(--seam);padding-top:13px}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block}
 
   .panel{background:var(--card);border:1px solid var(--line);border-top:none;padding:28px;margin-top:0}
   .field{margin-bottom:20px}
   label{display:block;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
   label .opt{color:var(--steel);font-weight:500;letter-spacing:.1em;text-transform:none}
-  input[type="text"], textarea{
+  input[type="text"], input[type="password"], input[type="file"], textarea{
     width:100%;padding:13px 14px;font-size:16px;font-family:'Archivo',sans-serif;
     border:1px solid var(--line);border-radius:0;background:var(--paper);color:var(--ink);
   }
@@ -55,7 +65,15 @@
   .pulse{display:inline-block;width:9px;height:9px;background:var(--seam);margin-right:9px;animation:pl 1.1s infinite}
   @keyframes pl{0%,100%{opacity:1}50%{opacity:.2}}
 
+  .progress-bar{margin-top:14px;height:6px;background:var(--line);position:relative;overflow:hidden;display:none}
+  .progress-bar.on{display:block}
+  .progress-fill{height:100%;background:var(--seam);width:0%;transition:width .3s ease}
+
   .cost-note{margin-top:14px;padding:12px 14px;font-size:12.5px;color:var(--ink);background:var(--seam-soft);border-left:3px solid var(--seam)}
+
+  .seed-box{padding:16px;background:var(--paper);border:1px dashed var(--line);margin-bottom:20px}
+  .seed-info{margin-top:12px;padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;background:var(--card);border-left:3px solid var(--ok);display:none}
+  .seed-info.on{display:block}
 
   details.help{margin-top:0;border:1px solid var(--line);border-top:none;background:var(--card)}
   details.help summary{cursor:pointer;padding:16px 28px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);list-style:none}
@@ -80,7 +98,6 @@
   .res-head .meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel)}
 
   .block{background:var(--card);border:1px solid var(--line);border-top:none;padding:24px 26px}
-  .block + .block{margin-top:26px;border-top:3px solid var(--ink)}
   .block-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
   .block-title h3{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
   .block-title h3 span{color:var(--seam)}
@@ -101,111 +118,226 @@
   td a{color:var(--seam);text-decoration:none;word-break:break-word}
   td a:hover{text-decoration:underline}
   .cat-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--seam-soft);border-left:2px solid var(--seam);padding:2px 6px;color:var(--ink)}
+  .cat-tag.unknown{background:var(--paper);border-left-color:var(--steel);color:var(--steel)}
   .score-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:2px 8px;background:var(--ink);color:#fff}
   .table-wrap{overflow-x:auto}
+  .table-wrap.scroll{max-height:520px;overflow-y:auto}
 
   footer{margin-top:56px;font-size:12px;color:var(--steel);font-family:'IBM Plex Mono',monospace}
-  @media(max-width:560px){.panel{padding:20px 16px}.block{padding:18px 14px}}
+  @media(max-width:560px){.panel{padding:20px 16px}.block{padding:18px 14px}.tab{padding:12px 12px;font-size:11px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <div class="brand">Modonix &middot; Prospecting</div>
-    <h1>Prospect <span class="seamword">Finder</span></h1>
-    <p class="tagline">Feed it a customer category and one or more ZIP codes or cities. No API key needed here, that's handled securely on the server.</p>
+    <div class="brand">Modonix &middot; Customer Toolkit</div>
+    <h1>Customer <span class="seamword">Toolkit</span></h1>
+    <p class="tagline">Three tools, one roof. Classify who your customers already are, find new prospects by category, or find lookalikes of a customer you already like. Keys stay on the server &mdash; nothing sensitive touches this page.</p>
   </header>
 
-  <div class="panel">
-    <div class="field">
-      <label for="category">Customer Category</label>
-      <input type="text" id="category" placeholder="e.g. industrial safety equipment distributors">
-    </div>
-
-    <div class="row" style="margin-bottom:20px;align-items:flex-end">
-      <div class="field" style="margin-bottom:0">
-        <label for="locType" style="margin-bottom:6px">Search by</label>
-        <select id="locType">
-          <option value="zip">ZIP code</option>
-          <option value="city">City</option>
-        </select>
-      </div>
-      <div class="count-select">
-        <label for="radius" style="margin:0;font-size:11px">Radius</label>
-        <select id="radius">
-          <option value="16000">10 mi</option>
-          <option value="32000" selected>20 mi</option>
-          <option value="48000">30 mi (practical max)</option>
-        </select>
-      </div>
-      <div class="count-select">
-        <label for="details" style="margin:0;font-size:11px">Phone &amp; website</label>
-        <select id="details">
-          <option value="yes" selected>Include</option>
-          <option value="no">Skip (cheapest)</option>
-        </select>
-      </div>
-      <div class="count-select">
-        <label for="maxSearches" style="margin:0;font-size:11px">Session cap</label>
-        <input type="number" id="maxSearches" value="25" min="1" max="500">
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="locValue">Location(s) <span class="opt" id="locHint">(one ZIP per line — add more lines to search multiple areas in one run)</span></label>
-      <textarea id="locValue" rows="3" placeholder="32937&#10;32901&#10;32935"></textarea>
-    </div>
-
-    <div class="scoring-box">
-      <div class="field">
-        <label for="scoreWebsite">Has website</label>
-        <input type="number" id="scoreWebsite" value="2" min="0" max="20">
-      </div>
-      <div class="field">
-        <label for="scorePhone">Has phone</label>
-        <input type="number" id="scorePhone" value="1" min="0" max="20">
-      </div>
-      <div class="field" style="flex:1;min-width:220px">
-        <label for="scoreKeywords">Bonus keywords in name <span class="opt">(comma separated, optional)</span></label>
-        <input type="text" id="scoreKeywords" placeholder="e.g. industrial, commercial, wholesale">
-      </div>
-      <div class="field">
-        <label for="scoreKeywordPts">Points per keyword</label>
-        <input type="number" id="scoreKeywordPts" value="1" min="0" max="20">
-      </div>
-    </div>
-
-    <div class="row">
-      <button class="btn-mine" id="findBtn" onclick="runSearch()">Find Prospects</button>
-      <button class="btn-secondary" onclick="saveCurrentSearch()">Save This Search Setup</button>
-    </div>
-    <div class="status" id="status"></div>
-    <div class="cost-note">
-      Each location searched is one billed request behind the scenes, whether it finds 2 businesses or 20. Results are deduplicated across every location in this run, so overlapping areas won't double-count the same business. The session cap is a same-tab convenience limit, real usage control lives in your Google Cloud budget/quota settings on the server side.
-    </div>
-
-    <div class="saved-panel">
-      <label style="margin-bottom:10px">Saved Search Setups <span class="opt">(stored in this browser only)</span></label>
-      <div id="savedList"></div>
-    </div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" id="tab-finder" onclick="showTab('finder')">Prospect Finder</button>
+    <button class="tab" id="tab-similar" onclick="showTab('similar')">Find Similar</button>
+    <button class="tab" id="tab-classify" onclick="showTab('classify')">Customer Classifier</button>
   </div>
 
-  <details class="help">
-    <summary>How to use this tool</summary>
-    <div class="help-body">
-      <ol>
-        <li><strong>Customer Category</strong> is what kind of business you're looking for, written like you'd search Google, e.g. "commercial plumbing contractor" or "industrial safety equipment distributor."</li>
-        <li><strong>Location(s)</strong> takes one ZIP code or city per line. Add several lines to cover multiple areas in a single run, results across all of them get combined and deduplicated automatically.</li>
-        <li><strong>Radius</strong> controls how far out from each location to search. Google's practical limit is around 30 miles per point, entering a bigger area just means adding more location lines instead.</li>
-        <li><strong>Lead scoring</strong> gives every result a point total based on the rules you set (having a website, having a phone number, matching bonus keywords in the business name). Higher-scoring, more complete leads sort to the top.</li>
-        <li><strong>Save This Search Setup</strong> remembers your category, locations, and settings for next time, it does not save the results themselves, just the setup so you can rerun it fresh.</li>
-        <li>When results come in, use <strong>Download Excel</strong> for a spreadsheet file, or <strong>Copy for Sheets</strong> to paste directly into an open Google Sheet (click a cell in Sheets, then paste).</li>
-        <li>Click a column header in the results table to sort by that column.</li>
-      </ol>
-    </div>
-  </details>
+  <!-- ==================== TAB 1: PROSPECT FINDER ==================== -->
+  <div class="tabpanel active" id="panel-finder">
+    <div class="panel">
+      <div class="field">
+        <label for="category">Customer Category</label>
+        <input type="text" id="category" placeholder="e.g. industrial safety equipment distributors">
+      </div>
 
+      <div class="row" style="margin-bottom:20px;align-items:flex-end">
+        <div class="field" style="margin-bottom:0">
+          <label for="locType" style="margin-bottom:6px">Search by</label>
+          <select id="locType">
+            <option value="zip">ZIP code</option>
+            <option value="city">City</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="radius" style="margin:0;font-size:11px">Radius</label>
+          <select id="radius">
+            <option value="16000">10 mi</option>
+            <option value="32000" selected>20 mi</option>
+            <option value="48000">30 mi (practical max)</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="details" style="margin:0;font-size:11px">Phone &amp; website</label>
+          <select id="details">
+            <option value="yes" selected>Include</option>
+            <option value="no">Skip (cheapest)</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="maxSearches" style="margin:0;font-size:11px">Session cap</label>
+          <input type="number" id="maxSearches" value="25" min="1" max="500">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="locValue">Location(s) <span class="opt" id="locHint">(one ZIP per line — add more lines to search multiple areas in one run)</span></label>
+        <textarea id="locValue" rows="3" placeholder="32937&#10;32901&#10;32935"></textarea>
+      </div>
+
+      <div class="scoring-box">
+        <div class="field">
+          <label for="scoreWebsite">Has website</label>
+          <input type="number" id="scoreWebsite" value="2" min="0" max="20">
+        </div>
+        <div class="field">
+          <label for="scorePhone">Has phone</label>
+          <input type="number" id="scorePhone" value="1" min="0" max="20">
+        </div>
+        <div class="field" style="flex:1;min-width:220px">
+          <label for="scoreKeywords">Bonus keywords in name <span class="opt">(comma separated, optional)</span></label>
+          <input type="text" id="scoreKeywords" placeholder="e.g. industrial, commercial, wholesale">
+        </div>
+        <div class="field">
+          <label for="scoreKeywordPts">Points per keyword</label>
+          <input type="number" id="scoreKeywordPts" value="1" min="0" max="20">
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn-mine" id="findBtn" onclick="runSearch()">Find Prospects</button>
+        <button class="btn-secondary" onclick="saveCurrentSearch()">Save This Search Setup</button>
+      </div>
+      <div class="status" id="status"></div>
+      <div class="cost-note">
+        Each location searched is one billed request behind the scenes, whether it finds 2 businesses or 20. Results are deduplicated across every location in this run, so overlapping areas won't double-count the same business. The session cap is a same-tab convenience limit, real usage control lives in your Google Cloud budget/quota settings on the server side.
+      </div>
+
+      <div class="saved-panel">
+        <label style="margin-bottom:10px">Saved Search Setups <span class="opt">(stored in this browser only)</span></label>
+        <div id="savedList"></div>
+      </div>
+    </div>
+
+    <details class="help">
+      <summary>How to use the Prospect Finder</summary>
+      <div class="help-body">
+        <ol>
+          <li><strong>Customer Category</strong> is what kind of business you're looking for, written like you'd search Google, e.g. "commercial plumbing contractor" or "industrial safety equipment distributor."</li>
+          <li><strong>Location(s)</strong> takes one ZIP code or city per line. Add several lines to cover multiple areas in a single run, results across all of them get combined and deduplicated automatically.</li>
+          <li><strong>Radius</strong> controls how far out from each location to search. Google's practical limit is around 30 miles per point, entering a bigger area just means adding more location lines instead.</li>
+          <li><strong>Lead scoring</strong> gives every result a point total based on the rules you set (having a website, having a phone number, matching bonus keywords in the business name). Higher-scoring, more complete leads sort to the top.</li>
+          <li><strong>Save This Search Setup</strong> remembers your category, locations, and settings for next time, it does not save the results themselves, just the setup so you can rerun it fresh.</li>
+          <li>When results come in, use <strong>Download Excel</strong> for a spreadsheet file, or <strong>Copy for Sheets</strong> to paste directly into an open Google Sheet.</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+
+  <!-- ==================== TAB 2: FIND SIMILAR ==================== -->
+  <div class="tabpanel" id="panel-similar">
+    <div class="panel">
+      <div class="seed-box">
+        <div class="field">
+          <label for="fs_seedName">Seed customer <span class="opt">(a customer you already like)</span></label>
+          <input type="text" id="fs_seedName" placeholder="e.g. Brace Manufacturing">
+        </div>
+        <div class="row" style="align-items:flex-end">
+          <div class="field" style="flex:1;min-width:200px;margin-bottom:0">
+            <label for="fs_seedLocation">Its city / state or ZIP <span class="opt">(helps find the exact one)</span></label>
+            <input type="text" id="fs_seedLocation" placeholder="e.g. Garland, TX">
+          </div>
+          <div class="field" style="flex:1;min-width:200px;margin-bottom:0">
+            <label for="fs_seedWebsite">Website <span class="opt">(optional)</span></label>
+            <input type="text" id="fs_seedWebsite" placeholder="e.g. bracemanufacturing.com">
+          </div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn-secondary" id="fs_analyzeBtn" onclick="analyzeSeed()">Analyze Seed &rarr; Suggest Category</button>
+        </div>
+        <div class="seed-info" id="fs_seedInfo"></div>
+      </div>
+
+      <div class="field">
+        <label for="fs_category">Customer Category <span class="opt">(auto-filled from the seed — edit if needed before searching)</span></label>
+        <input type="text" id="fs_category" placeholder="Analyze a seed above, or type a category here">
+      </div>
+
+      <div class="row" style="margin-bottom:20px;align-items:flex-end">
+        <div class="field" style="margin-bottom:0">
+          <label for="fs_locType" style="margin-bottom:6px">Search by</label>
+          <select id="fs_locType">
+            <option value="zip">ZIP code</option>
+            <option value="city">City</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="fs_radius" style="margin:0;font-size:11px">Radius</label>
+          <select id="fs_radius">
+            <option value="16000">10 mi</option>
+            <option value="32000" selected>20 mi</option>
+            <option value="48000">30 mi (practical max)</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="fs_details" style="margin:0;font-size:11px">Phone &amp; website</label>
+          <select id="fs_details">
+            <option value="yes" selected>Include</option>
+            <option value="no">Skip (cheapest)</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="fs_maxSearches" style="margin:0;font-size:11px">Session cap</label>
+          <input type="number" id="fs_maxSearches" value="25" min="1" max="500">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fs_locValue">Location(s) <span class="opt" id="fs_locHint">(one ZIP per line — Florida-wide means adding the ZIPs/cities you want to cover)</span></label>
+        <textarea id="fs_locValue" rows="3" placeholder="33811&#10;33813&#10;33830"></textarea>
+      </div>
+
+      <div class="scoring-box">
+        <div class="field">
+          <label for="fs_scoreWebsite">Has website</label>
+          <input type="number" id="fs_scoreWebsite" value="2" min="0" max="20">
+        </div>
+        <div class="field">
+          <label for="fs_scorePhone">Has phone</label>
+          <input type="number" id="fs_scorePhone" value="1" min="0" max="20">
+        </div>
+        <div class="field" style="flex:1;min-width:220px">
+          <label for="fs_scoreKeywords">Bonus keywords in name <span class="opt">(comma separated, optional)</span></label>
+          <input type="text" id="fs_scoreKeywords" placeholder="e.g. manufacturing, fabrication, machine">
+        </div>
+        <div class="field">
+          <label for="fs_scoreKeywordPts">Points per keyword</label>
+          <input type="number" id="fs_scoreKeywordPts" value="1" min="0" max="20">
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn-mine" id="fs_findBtn" onclick="runSimilarSearch()">Find Similar Prospects</button>
+      </div>
+      <div class="status" id="fs_status"></div>
+      <div class="cost-note">
+        "Analyze Seed" is one lookup. Then each location line is one billed request, same as the Prospect Finder. The seed business itself is dropped from the results automatically. Same geography rules apply: Google caps each point near 30 miles, so a whole state means adding more ZIP/city lines rather than one giant radius.
+      </div>
+    </div>
+
+    <details class="help">
+      <summary>How to use Find Similar</summary>
+      <div class="help-body">
+        <ol>
+          <li><strong>Seed customer</strong> is one company you already like. Add its city/state or ZIP so Google finds the exact one, and the website if you have it.</li>
+          <li><strong>Analyze Seed</strong> looks that business up and proposes a Customer Category. Review it and tweak it before searching — you stay in control of the wording.</li>
+          <li><strong>Location(s)</strong> works exactly like the Prospect Finder: one ZIP or city per line, tiled to cover as much area as you want. Not the whole country in one shot.</li>
+          <li>Run it and the results drop into the same table, with the seed company itself left out. Download Excel or Copy for Sheets like usual.</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+
+  <!-- ==================== SHARED FINDER RESULTS ==================== -->
   <div class="results" id="results">
     <div class="res-head">
       <h2>Prospect Report</h2>
@@ -215,8 +347,8 @@
       <div class="block-title">
         <h3><span>&#9646;</span> Matched Businesses</h3>
         <div class="btn-group">
-          <button class="btn-copy" onclick="downloadXlsx()">Download Excel</button>
-          <button class="btn-copy" id="copySheetsBtn" onclick="copyForSheets(this)">Copy for Sheets</button>
+          <button class="btn-copy" onclick="downloadFinderXlsx()">Download Excel</button>
+          <button class="btn-copy" id="copySheetsBtn" onclick="copyFinderForSheets(this)">Copy for Sheets</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -237,128 +369,85 @@
     </div>
   </div>
 
-  <footer>Modonix Prospect Finder v3.1 &middot; runs through a secure backend, no API key ever touches this page &middot; saved searches live in this browser only &middot; verify results before outreach</footer>
+  <!-- ==================== TAB 3: CUSTOMER CLASSIFIER ==================== -->
+  <div class="tabpanel" id="panel-classify">
+    <div class="panel">
+      <p class="tagline" style="margin-top:0;margin-bottom:22px">Upload a customer export with names and emails. It pulls the domain out of each email, researches it, and fills in an Industry and a more specific Sub-Industry for every row &mdash; no manual lookup. Feed the best-fit industries it surfaces back into the Prospect Finder tab.</p>
+
+      <div class="field">
+        <label for="fileInput">Customer Sheet <span class="opt">(.xlsx or .csv, needs an Email column, Name column optional)</span></label>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+        <p class="hint">Looks for a column header containing "email" and, if present, one containing "name" or "company". Everything else in the sheet rides along untouched.</p>
+      </div>
+
+      <div class="row">
+        <button class="btn-mine" id="clsRunBtn" onclick="runClassify()">Classify Customers</button>
+      </div>
+      <div class="status" id="cls_status"></div>
+      <div class="progress-bar" id="clsProgressBar"><div class="progress-fill" id="clsProgressFill"></div></div>
+      <div class="cost-note">
+        Rows sharing the same email domain are only researched once and the label is reused, so a batch of 100 customers from 30 companies is 30 lookups, not 100. Rows with no email, or with a personal email domain (gmail.com, yahoo.com, etc.), are skipped and marked rather than guessed at.
+        <br><br>
+        <strong>Reminder on cost:</strong> each unique company researched runs about 1 cent (the web search) plus a fraction of a cent for Claude reading and writing the label. The Anthropic key is held as a server secret, so the cost lands on your Anthropic account, not this page. Check Anthropic Console &rarr; Usage for the running total.
+      </div>
+    </div>
+
+    <div class="results" id="cls_results">
+      <div class="res-head">
+        <h2>Classification Report</h2>
+        <div class="meta" id="cls_resMeta"></div>
+      </div>
+      <div class="block">
+        <div class="block-title">
+          <h3><span>&#9646;</span> Customers with Industry</h3>
+          <button class="btn-copy" id="clsDownloadXlsx" onclick="downloadClassifierXlsx()">Download Excel</button>
+        </div>
+        <div class="table-wrap scroll">
+          <table id="clsResultsTable">
+            <thead><tr><th>Name</th><th>Email</th><th>Domain</th><th>Industry</th><th>Sub-Industry</th></tr></thead>
+            <tbody id="clsResultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Modonix Customer Toolkit v4.0 &middot; runs through a secure backend, no API key ever touches this page &middot; saved searches live in this browser only &middot; verify results before outreach</footer>
 </div>
 
 <script>
-let allResults = [];
-let sessionSearchCount = 0;
-let sortState = { field: 'score', dir: 'desc' };
-
-document.getElementById('locType').addEventListener('change', updateLocPlaceholder);
-
-function updateLocPlaceholder(){
-  const type = document.getElementById('locType').value;
-  const ta = document.getElementById('locValue');
-  const hint = document.getElementById('locHint');
-  if(type === 'zip'){
-    ta.placeholder = '32937\n32901\n32935';
-    hint.textContent = '(one ZIP per line — add more lines to search multiple areas in one run)';
-  } else {
-    ta.placeholder = 'Orlando, FL\nTampa, FL';
-    hint.textContent = '(one city per line — add more lines to search multiple areas in one run)';
-  }
-}
-
-function setStatus(kind, msg){
-  const s = document.getElementById('status');
-  s.className = 'status on ' + kind;
-  s.innerHTML = (kind === 'working' ? '<span class="pulse"></span>' : '') + msg;
+/* ============================================================
+   TABS
+   ============================================================ */
+function showTab(name){
+  ['finder','similar','classify'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+    document.getElementById('panel-' + t).classList.toggle('active', t === name);
+  });
+  // The finder results block is shared by Prospect Finder + Find Similar;
+  // hide it while on the Classifier tab so its own report shows cleanly.
+  const finderResEl = document.getElementById('results');
+  if(name === 'classify'){ finderResEl.style.display = 'none'; }
+  else { finderResEl.style.display = ''; }
 }
 
 function esc(s){
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function parseLocations(){
-  return document.getElementById('locValue').value
-    .split('\n')
-    .map(s => s.trim())
-    .filter(Boolean);
+/* ============================================================
+   SHARED FINDER ENGINE (Prospect Finder + Find Similar)
+   ============================================================ */
+let finderResults = [];
+let sessionSearchCount = 0;
+let sortState = { field: 'score', dir: 'desc' };
+
+function setStatus(elId, kind, msg){
+  const s = document.getElementById(elId);
+  s.className = 'status on ' + kind;
+  s.innerHTML = (kind === 'working' ? '<span class="pulse"></span>' : '') + msg;
 }
 
-// ---------- Saved Searches (localStorage) ----------
-const SAVED_KEY = 'modonix_prospect_saved_searches';
-
-function getSavedSearches(){
-  try{
-    return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]');
-  }catch(e){ return []; }
-}
-
-function setSavedSearches(list){
-  localStorage.setItem(SAVED_KEY, JSON.stringify(list));
-}
-
-function saveCurrentSearch(){
-  const category = document.getElementById('category').value.trim();
-  const locations = parseLocations();
-  if(!category || !locations.length){
-    setStatus('error','Enter a category and at least one location before saving.');
-    return;
-  }
-  const entry = {
-    id: Date.now().toString(36),
-    category,
-    locType: document.getElementById('locType').value,
-    locations,
-    radius: document.getElementById('radius').value,
-    details: document.getElementById('details').value,
-    scoreWebsite: document.getElementById('scoreWebsite').value,
-    scorePhone: document.getElementById('scorePhone').value,
-    scoreKeywords: document.getElementById('scoreKeywords').value,
-    scoreKeywordPts: document.getElementById('scoreKeywordPts').value,
-    savedAt: new Date().toLocaleString()
-  };
-  const list = getSavedSearches();
-  list.unshift(entry);
-  setSavedSearches(list.slice(0, 30)); // cap at 30 saved setups
-  renderSavedSearches();
-  setStatus('done','Search setup saved.');
-}
-
-function loadSavedSearch(id){
-  const list = getSavedSearches();
-  const entry = list.find(e => e.id === id);
-  if(!entry) return;
-  document.getElementById('category').value = entry.category;
-  document.getElementById('locType').value = entry.locType;
-  updateLocPlaceholder();
-  document.getElementById('locValue').value = entry.locations.join('\n');
-  document.getElementById('radius').value = entry.radius;
-  document.getElementById('details').value = entry.details;
-  document.getElementById('scoreWebsite').value = entry.scoreWebsite;
-  document.getElementById('scorePhone').value = entry.scorePhone;
-  document.getElementById('scoreKeywords').value = entry.scoreKeywords;
-  document.getElementById('scoreKeywordPts').value = entry.scoreKeywordPts;
-  setStatus('done','Loaded saved search: ' + entry.category);
-}
-
-function deleteSavedSearch(id){
-  const list = getSavedSearches().filter(e => e.id !== id);
-  setSavedSearches(list);
-  renderSavedSearches();
-}
-
-function renderSavedSearches(){
-  const container = document.getElementById('savedList');
-  const list = getSavedSearches();
-  if(!list.length){
-    container.innerHTML = '<p class="empty-note">No saved searches yet. Set up a search above and click "Save This Search Setup."</p>';
-    return;
-  }
-  container.innerHTML = list.map(e =>
-    '<div class="saved-item">' +
-      '<div><strong>' + esc(e.category) + '</strong> <span class="meta">' + esc(e.locations.join(', ')) + ' &middot; saved ' + esc(e.savedAt) + '</span></div>' +
-      '<div class="saved-actions btn-group">' +
-        '<button class="btn-copy" onclick="loadSavedSearch(\'' + e.id + '\')">Load</button>' +
-        '<button class="btn-copy" onclick="deleteSavedSearch(\'' + e.id + '\')">Delete</button>' +
-      '</div>' +
-    '</div>'
-  ).join('');
-}
-
-// ---------- Search ----------
 async function geocodeOne(locValue){
   const resp = await fetch('/api/geocode', {
     method: 'POST',
@@ -381,77 +470,159 @@ async function searchOne(category, lat, lng, radius, includeDetails){
   return data.places || [];
 }
 
-function computeScore(place){
-  const wPts = parseInt(document.getElementById('scoreWebsite').value, 10) || 0;
-  const pPts = parseInt(document.getElementById('scorePhone').value, 10) || 0;
-  const kPts = parseInt(document.getElementById('scoreKeywordPts').value, 10) || 0;
-  const keywords = document.getElementById('scoreKeywords').value
-    .split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
-
-  let score = 0;
-  if(place.website) score += wPts;
-  if(place.phone) score += pPts;
-  if(keywords.length){
+function computeScoreWith(place, score){
+  let total = 0;
+  if(place.website) total += score.website;
+  if(place.phone) total += score.phone;
+  if(score.keywords.length){
     const nameLower = (place.name || '').toLowerCase();
-    for(const kw of keywords){
-      if(kw && nameLower.includes(kw)) score += kPts;
+    for(const kw of score.keywords){
+      if(kw && nameLower.includes(kw)) total += score.kwPts;
     }
   }
-  return score;
+  return total;
 }
 
-async function runSearch(){
-  const category = document.getElementById('category').value.trim();
-  const locType = document.getElementById('locType').value;
-  const locations = parseLocations();
-  const radius = parseInt(document.getElementById('radius').value, 10);
-  const includeDetails = document.getElementById('details').value === 'yes';
-  const maxSearches = parseInt(document.getElementById('maxSearches').value, 10) || 25;
-
-  if(!category){ setStatus('error','Enter a customer category first.'); return; }
-  if(!locations.length){ setStatus('error','Enter at least one location first.'); return; }
-
-  const btn = document.getElementById('findBtn');
+// Core search used by both finder tabs. cfg carries everything.
+async function executeFinderSearch(cfg){
+  const btn = cfg.btn;
   btn.disabled = true;
   document.getElementById('results').classList.remove('on');
-  allResults = [];
+  finderResults = [];
   const seen = new Set();
+  if(cfg.excludeId) seen.add(cfg.excludeId);
 
   try{
-    for(let i = 0; i < locations.length; i++){
-      const locValue = locations[i];
+    for(let i = 0; i < cfg.locations.length; i++){
+      const locValue = cfg.locations[i];
 
-      if(sessionSearchCount >= maxSearches){
-        setStatus('error','Session limit reached (' + sessionSearchCount + ' of ' + maxSearches + ') partway through. Results so far are kept below. Raise the limit or reload to reset, then continue.');
+      if(sessionSearchCount >= cfg.maxSearches){
+        setStatus(cfg.statusId, 'error', 'Session limit reached (' + sessionSearchCount + ' of ' + cfg.maxSearches + ') partway through. Results so far are kept below. Raise the limit or reload to reset, then continue.');
         break;
       }
 
-      setStatus('working', 'Locating ' + locValue + ' (' + (i+1) + ' of ' + locations.length + ').');
+      setStatus(cfg.statusId, 'working', 'Locating ' + locValue + ' (' + (i+1) + ' of ' + cfg.locations.length + ').');
       const geo = await geocodeOne(locValue);
 
       sessionSearchCount++;
-      setStatus('working', 'Searching ' + locValue + ' (search ' + sessionSearchCount + ' of ' + maxSearches + ' allowed this session).');
+      setStatus(cfg.statusId, 'working', 'Searching ' + locValue + ' (search ' + sessionSearchCount + ' of ' + cfg.maxSearches + ' allowed this session).');
 
-      const places = await searchOne(category, geo.lat, geo.lng, radius, includeDetails);
+      const places = await searchOne(cfg.category, geo.lat, geo.lng, cfg.radius, cfg.includeDetails);
       for(const p of places){
         if(!p.id || seen.has(p.id)) continue;
         seen.add(p.id);
-        allResults.push({ ...p, area: locValue, score: 0 });
+        finderResults.push({ ...p, area: locValue, score: 0 });
       }
     }
 
-    for(const r of allResults){ r.score = computeScore(r); }
+    for(const r of finderResults){ r.score = computeScoreWith(r, cfg.score); }
 
-    renderResults();
-    setStatus('done', allResults.length + ' unique businesses found across ' + locations.length + ' location(s). Session searches used: ' + sessionSearchCount + ' of ' + maxSearches + '.');
+    renderFinderResults();
+    setStatus(cfg.statusId, 'done', finderResults.length + ' unique businesses found across ' + cfg.locations.length + ' location(s). Session searches used: ' + sessionSearchCount + ' of ' + cfg.maxSearches + '.');
   }catch(e){
     console.error(e);
-    setStatus('error','Search failed: ' + e.message);
+    setStatus(cfg.statusId, 'error', 'Search failed: ' + e.message);
   }finally{
     btn.disabled = false;
   }
 }
 
+function readScore(prefix){
+  return {
+    website: parseInt(document.getElementById(prefix + 'scoreWebsite').value, 10) || 0,
+    phone: parseInt(document.getElementById(prefix + 'scorePhone').value, 10) || 0,
+    kwPts: parseInt(document.getElementById(prefix + 'scoreKeywordPts').value, 10) || 0,
+    keywords: document.getElementById(prefix + 'scoreKeywords').value
+      .split(',').map(k => k.trim().toLowerCase()).filter(Boolean)
+  };
+}
+
+function readLocations(id){
+  return document.getElementById(id).value.split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+// --- Prospect Finder wrapper ---
+function runSearch(){
+  const category = document.getElementById('category').value.trim();
+  const locations = readLocations('locValue');
+  if(!category){ setStatus('status','error','Enter a customer category first.'); return; }
+  if(!locations.length){ setStatus('status','error','Enter at least one location first.'); return; }
+  executeFinderSearch({
+    category,
+    locations,
+    radius: parseInt(document.getElementById('radius').value, 10),
+    includeDetails: document.getElementById('details').value === 'yes',
+    maxSearches: parseInt(document.getElementById('maxSearches').value, 10) || 25,
+    score: readScore(''),
+    excludeId: null,
+    statusId: 'status',
+    btn: document.getElementById('findBtn')
+  });
+}
+
+// --- Find Similar wrapper ---
+let fsSeedId = null;
+
+async function analyzeSeed(){
+  const seedName = document.getElementById('fs_seedName').value.trim();
+  const seedLocation = document.getElementById('fs_seedLocation').value.trim();
+  const seedWebsite = document.getElementById('fs_seedWebsite').value.trim();
+  if(!seedName){ setStatus('fs_status','error','Enter a seed customer name first.'); return; }
+
+  const btn = document.getElementById('fs_analyzeBtn');
+  btn.disabled = true;
+  setStatus('fs_status','working','Looking up "' + seedName + '".');
+  try{
+    const resp = await fetch('/api/seed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seedName, seedLocation, seedWebsite })
+    });
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.error || 'Seed lookup failed');
+
+    fsSeedId = (data.match && data.match.id) || null;
+    if(data.suggestedCategory){
+      document.getElementById('fs_category').value = data.suggestedCategory;
+    }
+
+    const m = data.match || {};
+    const info = document.getElementById('fs_seedInfo');
+    info.innerHTML =
+      'Matched: <strong>' + esc(m.name || seedName) + '</strong><br>' +
+      (m.address ? esc(m.address) + '<br>' : '') +
+      (m.website ? esc(m.website) + '<br>' : '') +
+      'Google category: ' + esc(data.suggestedCategory || m.primaryType || 'n/a') +
+      '<br><br>Category box filled below — edit it if you want a broader or narrower search, then Find Similar.';
+    info.classList.add('on');
+    setStatus('fs_status','done','Seed analyzed. Review the category, add your ZIP/city lines, then Find Similar.');
+  }catch(e){
+    console.error(e);
+    setStatus('fs_status','error','Could not analyze seed: ' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function runSimilarSearch(){
+  const category = document.getElementById('fs_category').value.trim();
+  const locations = readLocations('fs_locValue');
+  if(!category){ setStatus('fs_status','error','Analyze a seed (or type a category) first.'); return; }
+  if(!locations.length){ setStatus('fs_status','error','Enter at least one location first.'); return; }
+  executeFinderSearch({
+    category,
+    locations,
+    radius: parseInt(document.getElementById('fs_radius').value, 10),
+    includeDetails: document.getElementById('fs_details').value === 'yes',
+    maxSearches: parseInt(document.getElementById('fs_maxSearches').value, 10) || 25,
+    score: readScore('fs_'),
+    excludeId: fsSeedId,
+    statusId: 'fs_status',
+    btn: document.getElementById('fs_findBtn')
+  });
+}
+
+/* --- shared finder results rendering / export --- */
 function sortBy(field){
   if(sortState.field === field){
     sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
@@ -459,13 +630,12 @@ function sortBy(field){
     sortState.field = field;
     sortState.dir = field === 'score' ? 'desc' : 'asc';
   }
-  renderResults();
+  renderFinderResults();
 }
 
-function renderResults(){
+function renderFinderResults(){
   const body = document.getElementById('resultsBody');
-
-  const sorted = [...allResults].sort((a, b) => {
+  const sorted = [...finderResults].sort((a, b) => {
     const f = sortState.field;
     let av = a[f], bv = b[f];
     if(f === 'score'){ av = av || 0; bv = bv || 0; }
@@ -489,14 +659,14 @@ function renderResults(){
       '</tr>'
     ).join('');
   }
-  document.getElementById('resMeta').textContent = allResults.length + ' businesses';
+  document.getElementById('resMeta').textContent = finderResults.length + ' businesses';
   document.getElementById('results').classList.add('on');
   document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-function downloadXlsx(){
-  if(!allResults.length){ setStatus('error','Nothing to download yet, run a search first.'); return; }
-  const rows = allResults.map(r => ({
+function downloadFinderXlsx(){
+  if(!finderResults.length){ setStatus('status','error','Nothing to download yet, run a search first.'); return; }
+  const rows = finderResults.map(r => ({
     'Score': r.score, 'Business': r.name, 'Address': r.address, 'Phone': r.phone, 'Website': r.website, 'Matched Area': r.area
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
@@ -506,10 +676,10 @@ function downloadXlsx(){
   XLSX.writeFile(wb, 'modonix_prospects.xlsx');
 }
 
-async function copyForSheets(btn){
-  if(!allResults.length){ setStatus('error','Nothing to copy yet, run a search first.'); return; }
+async function copyFinderForSheets(btn){
+  if(!finderResults.length){ setStatus('status','error','Nothing to copy yet, run a search first.'); return; }
   const header = ['Score','Business','Address','Phone','Website','Matched Area'];
-  const rows = allResults.map(r => [r.score, r.name, r.address, r.phone, r.website, r.area]);
+  const rows = finderResults.map(r => [r.score, r.name, r.address, r.phone, r.website, r.area]);
   const tsv = [header, ...rows].map(row => row.join('\t')).join('\n');
   try{
     await navigator.clipboard.writeText(tsv);
@@ -518,10 +688,271 @@ async function copyForSheets(btn){
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
   }catch(e){
-    setStatus('error','Copy failed, select and copy manually.');
+    setStatus('status','error','Copy failed, select and copy manually.');
   }
 }
 
+/* ============================================================
+   LOCATION PLACEHOLDERS (both finder tabs)
+   ============================================================ */
+document.getElementById('locType').addEventListener('change', () => {
+  const type = document.getElementById('locType').value;
+  const ta = document.getElementById('locValue');
+  const hint = document.getElementById('locHint');
+  if(type === 'zip'){ ta.placeholder = '32937\n32901\n32935'; hint.textContent = '(one ZIP per line — add more lines to search multiple areas in one run)'; }
+  else { ta.placeholder = 'Orlando, FL\nTampa, FL'; hint.textContent = '(one city per line — add more lines to search multiple areas in one run)'; }
+});
+document.getElementById('fs_locType').addEventListener('change', () => {
+  const type = document.getElementById('fs_locType').value;
+  const ta = document.getElementById('fs_locValue');
+  const hint = document.getElementById('fs_locHint');
+  if(type === 'zip'){ ta.placeholder = '33811\n33813\n33830'; hint.textContent = '(one ZIP per line — add the ZIPs you want to cover)'; }
+  else { ta.placeholder = 'Lakeland, FL\nTampa, FL'; hint.textContent = '(one city per line — add the cities you want to cover)'; }
+});
+
+/* ============================================================
+   SAVED SEARCHES (Prospect Finder tab, localStorage)
+   ============================================================ */
+const SAVED_KEY = 'modonix_prospect_saved_searches';
+
+function getSavedSearches(){
+  try{ return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); }catch(e){ return []; }
+}
+function setSavedSearches(list){ localStorage.setItem(SAVED_KEY, JSON.stringify(list)); }
+
+function saveCurrentSearch(){
+  const category = document.getElementById('category').value.trim();
+  const locations = readLocations('locValue');
+  if(!category || !locations.length){
+    setStatus('status','error','Enter a category and at least one location before saving.');
+    return;
+  }
+  const entry = {
+    id: Date.now().toString(36),
+    category,
+    locType: document.getElementById('locType').value,
+    locations,
+    radius: document.getElementById('radius').value,
+    details: document.getElementById('details').value,
+    scoreWebsite: document.getElementById('scoreWebsite').value,
+    scorePhone: document.getElementById('scorePhone').value,
+    scoreKeywords: document.getElementById('scoreKeywords').value,
+    scoreKeywordPts: document.getElementById('scoreKeywordPts').value,
+    savedAt: new Date().toLocaleString()
+  };
+  const list = getSavedSearches();
+  list.unshift(entry);
+  setSavedSearches(list.slice(0, 30));
+  renderSavedSearches();
+  setStatus('status','done','Search setup saved.');
+}
+
+function loadSavedSearch(id){
+  const entry = getSavedSearches().find(e => e.id === id);
+  if(!entry) return;
+  document.getElementById('category').value = entry.category;
+  document.getElementById('locType').value = entry.locType;
+  document.getElementById('locType').dispatchEvent(new Event('change'));
+  document.getElementById('locValue').value = entry.locations.join('\n');
+  document.getElementById('radius').value = entry.radius;
+  document.getElementById('details').value = entry.details;
+  document.getElementById('scoreWebsite').value = entry.scoreWebsite;
+  document.getElementById('scorePhone').value = entry.scorePhone;
+  document.getElementById('scoreKeywords').value = entry.scoreKeywords;
+  document.getElementById('scoreKeywordPts').value = entry.scoreKeywordPts;
+  setStatus('status','done','Loaded saved search: ' + entry.category);
+}
+
+function deleteSavedSearch(id){
+  setSavedSearches(getSavedSearches().filter(e => e.id !== id));
+  renderSavedSearches();
+}
+
+function renderSavedSearches(){
+  const container = document.getElementById('savedList');
+  const list = getSavedSearches();
+  if(!list.length){
+    container.innerHTML = '<p class="empty-note">No saved searches yet. Set up a search above and click "Save This Search Setup."</p>';
+    return;
+  }
+  container.innerHTML = list.map(e =>
+    '<div class="saved-item">' +
+      '<div><strong>' + esc(e.category) + '</strong> <span class="meta">' + esc(e.locations.join(', ')) + ' &middot; saved ' + esc(e.savedAt) + '</span></div>' +
+      '<div class="saved-actions btn-group">' +
+        '<button class="btn-copy" onclick="loadSavedSearch(\'' + e.id + '\')">Load</button>' +
+        '<button class="btn-copy" onclick="deleteSavedSearch(\'' + e.id + '\')">Delete</button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+/* ============================================================
+   CUSTOMER CLASSIFIER (calls /api/classify — key server-side)
+   ============================================================ */
+const PERSONAL_DOMAINS = new Set([
+  'gmail.com','yahoo.com','hotmail.com','outlook.com','aol.com','icloud.com',
+  'live.com','msn.com','comcast.net','att.net','verizon.net','me.com','protonmail.com'
+]);
+
+let parsedRows = [];
+let classifiedRows = [];
+
+function setClsProgress(pct){
+  const bar = document.getElementById('clsProgressBar');
+  const fill = document.getElementById('clsProgressFill');
+  if(pct === null){ bar.classList.remove('on'); return; }
+  bar.classList.add('on');
+  fill.style.width = pct + '%';
+}
+
+function findColumn(headers, keywords){
+  const lower = headers.map(h => String(h || '').toLowerCase());
+  for(const kw of keywords){
+    const idx = lower.findIndex(h => h.includes(kw));
+    if(idx !== -1) return idx;
+  }
+  return -1;
+}
+
+function parseFile(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try{
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if(!rows.length) throw new Error('Sheet appears empty.');
+
+        const headers = rows[0];
+        const emailIdx = findColumn(headers, ['email']);
+        const nameIdx = findColumn(headers, ['name','company']);
+        if(emailIdx === -1) throw new Error('Could not find an Email column. Check the sheet has a header containing "email".');
+
+        const out = [];
+        for(let i = 1; i < rows.length; i++){
+          const row = rows[i];
+          const email = String(row[emailIdx] || '').trim();
+          const name = nameIdx !== -1 ? String(row[nameIdx] || '').trim() : '';
+          if(!email) continue;
+          const domain = email.includes('@') ? email.split('@')[1].toLowerCase().trim() : '';
+          out.push({ name, email, domain, personal: PERSONAL_DOMAINS.has(domain) });
+        }
+        resolve(out);
+      }catch(err){ reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Could not read the file.'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function classifyDomain(domain, sampleName){
+  try{
+    const resp = await fetch('/api/classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain, sampleName })
+    });
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.error || 'Classification failed');
+    return { industry: data.industry || 'Unknown', subIndustry: data.subIndustry || 'Unknown' };
+  }catch(e){
+    console.error('Classification failed for ' + domain, e);
+    return { industry: 'Unknown (lookup failed)', subIndustry: 'Unknown (lookup failed)' };
+  }
+}
+
+async function runClassify(){
+  const fileInput = document.getElementById('fileInput');
+  if(!fileInput.files || !fileInput.files[0]){
+    setStatus('cls_status','error','Choose a customer sheet first.');
+    return;
+  }
+
+  const btn = document.getElementById('clsRunBtn');
+  btn.disabled = true;
+  document.getElementById('cls_results').classList.remove('on');
+  classifiedRows = [];
+
+  try{
+    setStatus('cls_status','working','Reading the sheet.');
+    parsedRows = await parseFile(fileInput.files[0]);
+    if(!parsedRows.length) throw new Error('No rows with an email address were found.');
+
+    const domainMap = new Map();
+    for(const r of parsedRows){
+      if(r.personal || !r.domain) continue;
+      if(!domainMap.has(r.domain)){
+        domainMap.set(r.domain, { industry: null, subIndustry: null, sampleName: r.name });
+      }
+    }
+
+    const domains = Array.from(domainMap.keys());
+    let done = 0;
+    for(const domain of domains){
+      done++;
+      setStatus('cls_status','working', 'Researching domain ' + done + ' of ' + domains.length + ': ' + domain);
+      setClsProgress(Math.round((done / domains.length) * 100));
+      const result = await classifyDomain(domain, domainMap.get(domain).sampleName);
+      domainMap.get(domain).industry = result.industry;
+      domainMap.get(domain).subIndustry = result.subIndustry;
+    }
+
+    classifiedRows = parsedRows.map(r => {
+      let industry, subIndustry;
+      if(!r.domain){ industry = 'Unknown (no domain)'; subIndustry = 'Unknown (no domain)'; }
+      else if(r.personal){ industry = 'Skipped (personal email domain)'; subIndustry = 'Skipped (personal email domain)'; }
+      else {
+        const d = domainMap.get(r.domain);
+        industry = (d && d.industry) || 'Unknown';
+        subIndustry = (d && d.subIndustry) || 'Unknown';
+      }
+      return { name: r.name, email: r.email, domain: r.domain, industry, subIndustry };
+    });
+
+    renderClassifierResults();
+    setClsProgress(null);
+    setStatus('cls_status','done', classifiedRows.length + ' customers processed across ' + domains.length + ' unique business domains.');
+  }catch(e){
+    console.error(e);
+    setClsProgress(null);
+    setStatus('cls_status','error','Classification failed: ' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function renderClassifierResults(){
+  const body = document.getElementById('clsResultsBody');
+  body.innerHTML = classifiedRows.map(r => {
+    const isUnknown = r.industry.toLowerCase().startsWith('unknown') || r.industry.toLowerCase().startsWith('skipped');
+    return '<tr>' +
+      '<td>' + esc(r.name) + '</td>' +
+      '<td>' + esc(r.email) + '</td>' +
+      '<td>' + esc(r.domain) + '</td>' +
+      '<td><span class="cat-tag' + (isUnknown ? ' unknown' : '') + '">' + esc(r.industry) + '</span></td>' +
+      '<td><span class="cat-tag' + (isUnknown ? ' unknown' : '') + '">' + esc(r.subIndustry) + '</span></td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('cls_resMeta').textContent = classifiedRows.length + ' customers';
+  document.getElementById('cls_results').classList.add('on');
+  document.getElementById('cls_results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function downloadClassifierXlsx(){
+  if(!classifiedRows.length){ setStatus('cls_status','error','Nothing to download yet, run a classification first.'); return; }
+  const rows = classifiedRows.map(r => ({
+    'Name': r.name, 'Email': r.email, 'Domain': r.domain, 'Industry': r.industry, 'Sub-Industry': r.subIndustry
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:32},{wch:24},{wch:22},{wch:34}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Classified');
+  XLSX.writeFile(wb, 'modonix_classified_customers.xlsx');
+}
+
+/* init */
 renderSavedSearches();
 </script>
 </body>
