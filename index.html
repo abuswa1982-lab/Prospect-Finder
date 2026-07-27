@@ -139,6 +139,7 @@
   <div class="tabs" role="tablist">
     <button class="tab active" id="tab-finder" onclick="showTab('finder')">Prospect Finder</button>
     <button class="tab" id="tab-similar" onclick="showTab('similar')">Find Similar</button>
+    <button class="tab" id="tab-sweep" onclick="showTab('sweep')">Area Sweep</button>
     <button class="tab" id="tab-classify" onclick="showTab('classify')">Customer Classifier</button>
   </div>
 
@@ -337,6 +338,93 @@
     </details>
   </div>
 
+  <!-- ==================== TAB 4: AREA SWEEP ==================== -->
+  <div class="tabpanel" id="panel-sweep">
+    <div class="panel">
+      <p class="tagline" style="margin-top:0;margin-bottom:22px">Give it one center ZIP and a category. It fans out across the surrounding area in waves — searching a grid of points around your center — and keeps going until fresh results dry up or it hits your session cap. This is how you get past Google's 20-per-point ceiling: many points, merged and deduplicated into one list.</p>
+
+      <div class="field">
+        <label for="sw_category">Customer Category</label>
+        <input type="text" id="sw_category" placeholder="e.g. sheet metal fabrication">
+      </div>
+
+      <div class="field">
+        <label for="sw_center">Center ZIP or city</label>
+        <input type="text" id="sw_center" placeholder="e.g. 32935">
+      </div>
+
+      <div class="row" style="margin-bottom:20px;align-items:flex-end">
+        <div class="count-select">
+          <label for="sw_radius" style="margin:0;font-size:11px">Per-point radius</label>
+          <select id="sw_radius">
+            <option value="16000">10 mi</option>
+            <option value="24000" selected>15 mi</option>
+            <option value="32000">20 mi</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="sw_maxWaves" style="margin:0;font-size:11px">Max waves</label>
+          <input type="number" id="sw_maxWaves" value="3" min="1" max="6">
+        </div>
+        <div class="count-select">
+          <label for="sw_stopThreshold" style="margin:0;font-size:11px">Stop when a wave adds &lt;</label>
+          <input type="number" id="sw_stopThreshold" value="3" min="0" max="50">
+        </div>
+        <div class="count-select">
+          <label for="sw_details" style="margin:0;font-size:11px">Phone &amp; website</label>
+          <select id="sw_details">
+            <option value="yes" selected>Include</option>
+            <option value="no">Skip (cheapest)</option>
+          </select>
+        </div>
+        <div class="count-select">
+          <label for="sw_maxSearches" style="margin:0;font-size:11px">Session cap</label>
+          <input type="number" id="sw_maxSearches" value="25" min="1" max="500">
+        </div>
+      </div>
+
+      <div class="scoring-box">
+        <div class="field">
+          <label for="sw_scoreWebsite">Has website</label>
+          <input type="number" id="sw_scoreWebsite" value="2" min="0" max="20">
+        </div>
+        <div class="field">
+          <label for="sw_scorePhone">Has phone</label>
+          <input type="number" id="sw_scorePhone" value="1" min="0" max="20">
+        </div>
+        <div class="field" style="flex:1;min-width:220px">
+          <label for="sw_scoreKeywords">Bonus keywords in name <span class="opt">(comma separated, optional)</span></label>
+          <input type="text" id="sw_scoreKeywords" placeholder="e.g. manufacturing, fabrication, machine">
+        </div>
+        <div class="field">
+          <label for="sw_scoreKeywordPts">Points per keyword</label>
+          <input type="number" id="sw_scoreKeywordPts" value="1" min="0" max="20">
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn-mine" id="sw_findBtn" onclick="runSweep()">Sweep The Area</button>
+      </div>
+      <div class="status" id="sw_status"></div>
+      <div class="cost-note">
+        Each point searched is one billed request. A center plus one ring is 9 searches; plus a second ring is 25. The session cap stops the sweep before it runs away with your Google bill, and "stop when a wave adds fewer than N" halts it automatically once an area is picked clean. Google still returns up to 20 per point, so overlapping points are merged and deduplicated into one list.
+      </div>
+    </div>
+
+    <details class="help">
+      <summary>How Area Sweep works</summary>
+      <div class="help-body">
+        <ol>
+          <li><strong>Center ZIP</strong> is the middle of the area you want to cover. The sweep pins that spot, then searches outward from it.</li>
+          <li><strong>Waves</strong> are rings of search points around the center. Wave 0 is the center itself; wave 1 is a ring of 8 points around it; wave 2 is the next ring out, and so on. Each point is its own search returning up to 20 businesses, all merged and deduplicated.</li>
+          <li><strong>Per-point radius</strong> sets how big each point's circle is. Smaller circles with more points give tighter, more thorough coverage; bigger circles cover ground faster with fewer searches.</li>
+          <li><strong>Stop when a wave adds fewer than N</strong> is the auto-stop: once a fresh ring turns up almost no new businesses, the area's picked clean and the sweep ends on its own — exactly the "keep going until nothing new" behavior.</li>
+          <li><strong>Session cap</strong> is the hard ceiling on billed searches for one sweep, so it can never run away. Results build in the table below as each wave finishes; Download Excel or Copy for Sheets when it's done.</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+
   <!-- ==================== SHARED FINDER RESULTS ==================== -->
   <div class="results" id="results">
     <div class="res-head">
@@ -412,7 +500,7 @@
     </div>
   </div>
 
-  <footer>Modonix Customer Toolkit v4.0 &middot; runs through a secure backend, no API key ever touches this page &middot; saved searches live in this browser only &middot; verify results before outreach</footer>
+  <footer>Modonix Customer Toolkit v4.1 &middot; runs through a secure backend, no API key ever touches this page &middot; saved searches live in this browser only &middot; verify results before outreach</footer>
 </div>
 
 <script>
@@ -420,7 +508,7 @@
    TABS
    ============================================================ */
 function showTab(name){
-  ['finder','similar','classify'].forEach(t => {
+  ['finder','similar','sweep','classify'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === name);
     document.getElementById('panel-' + t).classList.toggle('active', t === name);
   });
@@ -620,6 +708,97 @@ function runSimilarSearch(){
     statusId: 'fs_status',
     btn: document.getElementById('fs_findBtn')
   });
+}
+
+// --- Area Sweep ---
+// Convert a north/east offset in miles to a lat/lng delta at a given latitude.
+function milesToLatLng(centerLat, dNorthMiles, dEastMiles){
+  const dLat = dNorthMiles / 69;
+  const dLng = dEastMiles / (69 * Math.cos(centerLat * Math.PI / 180));
+  return { dLat, dLng };
+}
+
+async function runSweep(){
+  const category = document.getElementById('sw_category').value.trim();
+  const center = document.getElementById('sw_center').value.trim();
+  if(!category){ setStatus('sw_status','error','Enter a customer category first.'); return; }
+  if(!center){ setStatus('sw_status','error','Enter a center ZIP or city first.'); return; }
+
+  const radius = parseInt(document.getElementById('sw_radius').value, 10);
+  const radiusMiles = radius / 1609;
+  const stepMiles = radiusMiles * 1.5; // ring spacing, circles overlap a little
+  const maxWaves = parseInt(document.getElementById('sw_maxWaves').value, 10) || 3;
+  const stopThreshold = parseInt(document.getElementById('sw_stopThreshold').value, 10);
+  const includeDetails = document.getElementById('sw_details').value === 'yes';
+  const maxSearches = parseInt(document.getElementById('sw_maxSearches').value, 10) || 25;
+  const score = readScore('sw_');
+
+  const btn = document.getElementById('sw_findBtn');
+  btn.disabled = true;
+  document.getElementById('results').classList.remove('on');
+  finderResults = [];
+  const seen = new Set();
+
+  try{
+    setStatus('sw_status','working','Locating center ' + center + '.');
+    const geo = await geocodeOne(center);
+    const clat = geo.lat, clng = geo.lng;
+
+    let stopped = false;
+    for(let wave = 0; wave <= maxWaves && !stopped; wave++){
+      // Build the points for this ring (square ring at Chebyshev distance == wave).
+      const points = [];
+      if(wave === 0){
+        points.push({ lat: clat, lng: clng });
+      } else {
+        for(let i = -wave; i <= wave; i++){
+          for(let j = -wave; j <= wave; j++){
+            if(Math.max(Math.abs(i), Math.abs(j)) !== wave) continue;
+            const off = milesToLatLng(clat, j * stepMiles, i * stepMiles);
+            points.push({ lat: clat + off.dLat, lng: clng + off.dLng });
+          }
+        }
+      }
+
+      let newThisWave = 0;
+      let pointIdx = 0;
+      for(const pt of points){
+        pointIdx++;
+        if(sessionSearchCount >= maxSearches){
+          setStatus('sw_status','error','Session cap reached (' + sessionSearchCount + ' of ' + maxSearches + ') mid-sweep. Results so far are below. Raise the cap or reload to reset.');
+          stopped = true;
+          break;
+        }
+        sessionSearchCount++;
+        setStatus('sw_status','working','Wave ' + wave + ' — point ' + pointIdx + ' of ' + points.length + ' (' + finderResults.length + ' found so far, search ' + sessionSearchCount + ' of ' + maxSearches + ').');
+        const places = await searchOne(category, pt.lat, pt.lng, radius, includeDetails);
+        for(const p of places){
+          if(!p.id || seen.has(p.id)) continue;
+          seen.add(p.id);
+          finderResults.push({ ...p, area: center + ' / wave ' + wave, score: 0 });
+          newThisWave++;
+        }
+      }
+
+      // Score and render progressively after each wave.
+      for(const r of finderResults){ r.score = computeScoreWith(r, score); }
+      renderFinderResults();
+
+      if(!stopped && wave >= 1 && newThisWave < stopThreshold){
+        setStatus('sw_status','done','Sweep stopped after wave ' + wave + ': only ' + newThisWave + ' new in that ring (below your threshold of ' + stopThreshold + '). ' + finderResults.length + ' businesses total, ' + sessionSearchCount + ' searches used.');
+        stopped = true;
+      }
+    }
+
+    if(!stopped){
+      setStatus('sw_status','done','Sweep complete. ' + finderResults.length + ' unique businesses found. Searches used: ' + sessionSearchCount + ' of ' + maxSearches + '.');
+    }
+  }catch(e){
+    console.error(e);
+    setStatus('sw_status','error','Sweep failed: ' + e.message);
+  }finally{
+    btn.disabled = false;
+  }
 }
 
 /* --- shared finder results rendering / export --- */
